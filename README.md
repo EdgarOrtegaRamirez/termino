@@ -1,6 +1,6 @@
 # Termino ⏱️
 
-A sleek terminal-based timer and stopwatch CLI tool with countdown, lap timing, pomodoro mode, desktop notifications, and session logging.
+A sleek terminal-based timer and stopwatch CLI tool — rewritten in Rust for speed and reliability. Features countdown, lap timing, pomodoro mode, desktop notifications, and session logging.
 
 ## Features
 
@@ -8,22 +8,25 @@ A sleek terminal-based timer and stopwatch CLI tool with countdown, lap timing, 
 - **⏳ Countdown** — Set a timer and get notified when it's done
 - **🍅 Pomodoro Timer** — Work/break intervals with automatic cycling
 - **🏁 Lap Tracking** — Record laps with split times during stopwatch mode
-- **🔔 Desktop Notifications** — Get notified when timers expire (via `notify-send` or terminal bell)
+- **🔔 Desktop Notifications** — Get notified when timers expire (via `notify-rust` or terminal bell)
 - **📋 Session Logging** — All sessions saved to `~/.termino/sessions.json` for review
-- **🎨 Rich Terminal UI** — Beautiful output with colors and progress bars using `rich`
+- **⚡ Blazing Fast** — Written in Rust with zero unnecessary dependencies
 
 ## Installation
 
-```bash
-pip install termino
-```
-
-Or from source:
+### From source
 
 ```bash
+# Requires Rust 1.70+
 git clone https://github.com/EdgarOrtegaRamirez/termino
 cd termino
-pip install -e .
+cargo install --path .
+```
+
+### Via cargo
+
+```bash
+cargo install termino
 ```
 
 ## Quick Start
@@ -122,6 +125,31 @@ All sessions are automatically logged to `~/.termino/sessions.json` in JSON form
     ]
   }
 ]
+```
+
+## Architecture
+
+```
+src/
+├── main.rs          # Entry point
+├── lib.rs           # Library root
+├── cli.rs           # CLI argument parsing with clap
+├── timer.rs         # Stopwatch & Countdown logic
+├── pomodoro.rs      # Pomodoro timer with work/break cycling
+├── display.rs       # Terminal display with crossterm
+├── notifications.rs # Desktop notifications (notify-rust + terminal bell)
+└── storage.rs       # Session logging to JSON
+tests/
+├── test_timer.rs    # 22 tests for stopwatch/countdown
+├── test_pomodoro.rs # 13 tests for pomodoro
+├── test_storage.rs  # 9 tests for session storage
+└── test_cli.rs      # 9 tests for CLI
+```
+
+## Testing
+
+```bash
+cargo test
 ```
 
 ## License

@@ -1,16 +1,7 @@
-# Python
-__pycache__/
-*.py[cod]
-*.egg-info/
-*.egg
-dist/
-build/
-.eggs/
-
-# Virtual environment
-venv/
-.venv/
-env/
+# Rust
+target/
+*.rs.bk
+Cargo.lock
 
 # OS
 .DS_Store
@@ -22,11 +13,6 @@ Thumbs.db
 
 # Environment
 .env
-
-# Coverage
-.coverage
-htmlcov/
-coverage.xml
 
 # Termino data
 sessions.json

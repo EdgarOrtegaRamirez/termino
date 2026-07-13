@@ -2,67 +2,90 @@
 
 ## Project Overview
 
-**Termino** — A terminal-based timer and stopwatch CLI tool with countdown, lap timing, pomodoro mode, desktop notifications, and session logging.
+**Termino** — A terminal-based timer and stopwatch CLI tool with countdown, lap timing, pomodoro mode, desktop notifications, and session logging. Written in Rust.
 
 ## Architecture
 
-- `src/termino/` — Main package directory
-  - `__init__.py` — Package init, version info
-  - `__main__.py` — Entry point for `python -m termino`
-  - `cli.py` — Click-based CLI interface with all commands
-  - `timer.py` — Core timer/stopwatch logic with key-based controls
-  - `pomodoro.py` — Pomodoro timer with work/break cycling
-  - `notifications.py` — Desktop notification support (notify-send, terminal bell)
-  - `storage.py` — Session logging to JSON files
-  - `display.py` — Rich-based terminal display formatting
-- `tests/` — Test directory
-  - `test_timer.py` — Tests for timer logic
-  - `test_pomodoro.py` — Tests for pomodoro logic
-  - `test_storage.py` — Tests for session storage
-  - `test_cli.py` — Tests for CLI commands
-- `pyproject.toml` — Project metadata and dependencies
-- `README.md` — User-facing documentation
-- `AGENTS.md` — This file: architecture and development notes
-- `LICENSE` — MIT
+```
+src/
+├── main.rs          # Entry point — calls into termino::cli
+├── lib.rs           # Library root — re-exports all modules
+├── cli.rs           # CLI argument parsing with clap derive (Parser + Subcommand)
+├── timer.rs         # Stopwatch, Countdown, Lap, TimerState
+├── pomodoro.rs      # PomodoroTimer with work/break cycling
+├── display.rs       # Terminal display with crossterm (raw mode, key polling, progress bars)
+├── notifications.rs # Desktop notifications (notify-rust on Linux, terminal bell fallback)
+└── storage.rs       # Session logging to ~/.termino/sessions.json (serde JSON)
+tests/
+├── test_timer.rs    # 22 tests for Stopwatch & Countdown
+├── test_pomodoro.rs # 13 tests for PomodoroTimer
+├── test_storage.rs  # 9 tests for storage layer
+└── test_cli.rs      # 9 tests for CLI (subprocess)
+```
 
 ## Building
 
 ```bash
-pip install -e .
+cargo build
+cargo build --release
 ```
 
 ## Testing
 
 ```bash
-# Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=src/termino
-
-# Run specific test file
-pytest tests/test_timer.py -v
+cargo test
 ```
 
 ## Key Design Decisions
 
-1. **Click for CLI** — Well-established Python CLI framework with good composability
-2. **Rich for display** — Beautiful terminal output with progress bars, tables, and colors
-3. **JSON file storage** — Simple, portable session logging under `~/.termino/`
-4. **Keyboard controls** — Real-time key handling during active timers (pausable)
-5. **Platform notifications** — Uses `notify-send` on Linux, terminal bell as fallback
-6. **Threading** — Timer runs in a background thread so keyboard input stays responsive
+1. **clap for CLI** — Derive-based argument parsing with subcommands
+2. **crossterm for terminal** — Raw mode, key polling, cursor management, ANSI styling
+3. **notify-rust for notifications** — Native desktop notifications on Linux, fallback to terminal bell
+4. **serde_json for storage** — Simple, portable JSON session logging under `~/.termino/`
+5. **chrono for timestamps** — RFC 3339 timestamps in session data
+6. **anyhow for errors** — Simple error handling with context propagation
+7. **No threading** — Single-threaded async event loop with non-blocking key polling
+8. **Atomic file writes** — Write to temp file, rename to avoid corruption
 
 ## Dependencies
 
-- Python 3.10+
-- `click>=8.0` — CLI framework
-- `rich>=13.0` — Terminal formatting and display
+- `clap` 4.x — CLI argument parsing
+- `crossterm` 0.28 — Terminal manipulation
+- `notify-rust` 4.x — Desktop notifications
+- `serde` / `serde_json` — JSON serialization
+- `chrono` — Timestamp handling
+- `dirs` — Platform-specific directories
+- `anyhow` — Error handling
+
+## State Machine
+
+### Stopwatch
+```
+Idle → Running ⇄ Paused → Stopped
+```
+
+### Countdown
+```
+Idle → Running ⇄ Paused → Stopped | Finished
+```
+
+### Pomodoro
+```
+Work → Break → Work → ... → Long Break → Work → ... → Complete
+```
+
+## Data Storage
+
+- Path: `~/.termino/sessions.json`
+- Format: JSON array of session objects
+- Structure: type, started, ended, duration_seconds, status, laps[], cycles[]
+- Writing: atomic (write to .tmp, rename)
+- Reading: tolerant of corrupted files (returns empty array)
 
 ## Testing Conventions
 
-- `pytest` with standard conventions
-- Test files named `test_*.py` in `tests/`
-- Test both happy paths and error cases
-- Use `pytest` fixtures for shared test data
-- Mock time-dependent operations with `pytest-mock` (optional, not required)
+- Integration tests only (tests/ directory)
+- CLI tests run the binary as a subprocess
+- Storage tests use TERMINO_HOME env var for isolation
+- Timer tests use real time with small sleeps
+- Pomodoro tests are purely logical (no sleep)
