@@ -1,4 +1,6 @@
-use std::io::{stdout, Write};
+#![allow(clippy::collapsible_if)]
+
+use std::io::{Write, stdout};
 use std::time::Duration;
 
 use crossterm::{
@@ -332,7 +334,10 @@ pub fn run_pomodoro_loop(pt: &mut PomodoroTimer) -> anyhow::Result<SessionData> 
                 if pt.phase == PomodoroPhase::Work {
                     send_notification(
                         "Termino",
-                        &format!("Work cycle {} complete! Take a break.", pt.completed_cycles() + 1),
+                        &format!(
+                            "Work cycle {} complete! Take a break.",
+                            pt.completed_cycles() + 1
+                        ),
                     );
                 } else {
                     send_notification("Termino", "Break over! Time to focus.");
@@ -370,13 +375,11 @@ pub fn run_pomodoro_loop(pt: &mut PomodoroTimer) -> anyhow::Result<SessionData> 
                 stdout,
                 "  {} {} {}%",
                 emoji,
-                style::style(format_duration(remaining)).with(
-                    match phase_color {
-                        "green" => style::Color::Green,
-                        "yellow" => style::Color::Yellow,
-                        _ => style::Color::White,
-                    }
-                ),
+                style::style(format_duration(remaining)).with(match phase_color {
+                    "green" => style::Color::Green,
+                    "yellow" => style::Color::Yellow,
+                    _ => style::Color::White,
+                }),
                 style::style((progress * 100.0) as u32).cyan()
             )?;
             stdout.flush()?;
@@ -425,10 +428,7 @@ pub fn print_session_summary(data: &SessionData) {
     println!();
     println!("{}", style::style("✓ Session Complete").bold().green());
     println!("  Type:     {}", data.session_type);
-    println!(
-        "  Duration: {}",
-        format_duration(data.duration_seconds)
-    );
+    println!("  Duration: {}", format_duration(data.duration_seconds));
     println!("  Status:   {}", data.status);
 
     if let Some(ref laps) = data.laps {

@@ -1,7 +1,11 @@
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(name = "termino", version = "0.1.0", about = "⏱️ A sleek terminal-based timer and stopwatch CLI tool")]
+#[command(
+    name = "termino",
+    version = "0.1.0",
+    about = "⏱️ A sleek terminal-based timer and stopwatch CLI tool"
+)]
 pub struct Args {
     #[command(subcommand)]
     pub command: Commands,
@@ -114,7 +118,11 @@ fn run_stopwatch() -> anyhow::Result<()> {
 fn run_countdown(duration_str: &str) -> anyhow::Result<()> {
     let seconds = parse_duration(duration_str)?;
     crate::display::print_banner();
-    println!("Countdown: {} ({})", duration_str, crate::display::format_duration(seconds));
+    println!(
+        "Countdown: {} ({})",
+        duration_str,
+        crate::display::format_duration(seconds)
+    );
 
     let mut cd = crate::timer::Countdown::new(seconds);
     let data = crate::display::run_countdown_loop(&mut cd)?;
@@ -123,7 +131,12 @@ fn run_countdown(duration_str: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn run_pomodoro(work: u32, break_duration: u32, cycles: u32, long_break: u32) -> anyhow::Result<()> {
+fn run_pomodoro(
+    work: u32,
+    break_duration: u32,
+    cycles: u32,
+    long_break: u32,
+) -> anyhow::Result<()> {
     if work == 0 || break_duration == 0 || cycles == 0 || long_break == 0 {
         anyhow::bail!("All durations and cycles must be positive");
     }
@@ -147,9 +160,13 @@ fn run_pomodoro(work: u32, break_duration: u32, cycles: u32, long_break: u32) ->
 }
 
 fn run_history(limit: usize, session_type: Option<String>) -> anyhow::Result<()> {
+    #[allow(clippy::collapsible_if)]
     if let Some(ref st) = session_type {
         if st != "stopwatch" && st != "countdown" && st != "pomodoro" {
-            anyhow::bail!("Invalid session type '{}'. Use: stopwatch, countdown, or pomodoro", st);
+            anyhow::bail!(
+                "Invalid session type '{}'. Use: stopwatch, countdown, or pomodoro",
+                st
+            );
         }
     }
 

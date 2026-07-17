@@ -1,10 +1,12 @@
-use termino::storage::{get_session_count, get_sessions, save_session, SessionData, SessionLap};
+use termino::storage::{SessionData, SessionLap, get_session_count, get_sessions, save_session};
 
 fn setup() {
     // Use a temp directory for storage in tests
     let tmp = std::env::temp_dir().join("termino_test");
     let _ = std::fs::remove_dir_all(&tmp);
-    unsafe { std::env::set_var("TERMINO_HOME", tmp.to_str().unwrap()); }
+    unsafe {
+        std::env::set_var("TERMINO_HOME", tmp.to_str().unwrap());
+    }
 }
 
 #[test]
@@ -46,8 +48,16 @@ fn test_save_session_returns_valid_data() {
 fn test_save_session_with_laps() {
     setup();
     let laps = vec![
-        SessionLap { lap: 1, split: 10.0, total: 10.0 },
-        SessionLap { lap: 2, split: 15.5, total: 25.5 },
+        SessionLap {
+            lap: 1,
+            split: 10.0,
+            total: 10.0,
+        },
+        SessionLap {
+            lap: 2,
+            split: 15.5,
+            total: 25.5,
+        },
     ];
     let session = SessionData {
         session_type: "stopwatch".to_string(),

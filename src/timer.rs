@@ -1,3 +1,5 @@
+#![allow(clippy::collapsible_if)]
+
 use std::time::Instant;
 
 /// Possible states of a timer.
@@ -46,7 +48,11 @@ impl Stopwatch {
     pub fn elapsed(&self) -> f64 {
         match self.state {
             TimerState::Running => {
-                self.elapsed + self.start_time.map(|t| t.elapsed().as_secs_f64()).unwrap_or(0.0)
+                self.elapsed
+                    + self
+                        .start_time
+                        .map(|t| t.elapsed().as_secs_f64())
+                        .unwrap_or(0.0)
             }
             _ => self.elapsed,
         }
@@ -104,7 +110,10 @@ impl Stopwatch {
             anyhow::bail!("Cannot record lap when stopwatch is not running");
         }
         let current = self.elapsed()
-            + self.start_time.map(|t| t.elapsed().as_secs_f64()).unwrap_or(0.0);
+            + self
+                .start_time
+                .map(|t| t.elapsed().as_secs_f64())
+                .unwrap_or(0.0);
         let prev_total = self.laps.last().map(|l| l.total).unwrap_or(0.0);
         let lap_number = self.laps.len() as u32 + 1;
         let lap = Lap {
@@ -156,7 +165,10 @@ impl Countdown {
         match self.state {
             TimerState::Running => {
                 let elapsed = self.elapsed
-                    + self.start_time.map(|t| t.elapsed().as_secs_f64()).unwrap_or(0.0);
+                    + self
+                        .start_time
+                        .map(|t| t.elapsed().as_secs_f64())
+                        .unwrap_or(0.0);
                 (self.duration - elapsed).max(0.0)
             }
             _ => (self.duration - self.elapsed).max(0.0),
@@ -166,7 +178,11 @@ impl Countdown {
     pub fn elapsed(&self) -> f64 {
         match self.state {
             TimerState::Running => {
-                self.elapsed + self.start_time.map(|t| t.elapsed().as_secs_f64()).unwrap_or(0.0)
+                self.elapsed
+                    + self
+                        .start_time
+                        .map(|t| t.elapsed().as_secs_f64())
+                        .unwrap_or(0.0)
             }
             _ => self.elapsed,
         }
