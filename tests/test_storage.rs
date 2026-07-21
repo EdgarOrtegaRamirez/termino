@@ -1,17 +1,22 @@
 use termino::storage::{SessionData, SessionLap, get_session_count, get_sessions, save_session};
 
-fn setup() {
-    // Use a temp directory for storage in tests
-    let tmp = std::env::temp_dir().join("termino_test");
+fn setup() -> std::path::PathBuf {
+    // Use a unique temp directory for storage in each test
+    let tmp = std::env::temp_dir().join(format!(
+        "termino_test_{}",
+        std::process::id()
+    ));
     let _ = std::fs::remove_dir_all(&tmp);
+    std::fs::create_dir_all(&tmp).unwrap();
     unsafe {
         std::env::set_var("TERMINO_HOME", tmp.to_str().unwrap());
     }
+    tmp
 }
 
 #[test]
 fn test_save_session_creates_file() {
-    setup();
+    let _ = setup();
     let session = SessionData {
         session_type: "stopwatch".to_string(),
         started: chrono::Utc::now().to_rfc3339(),
@@ -28,7 +33,7 @@ fn test_save_session_creates_file() {
 
 #[test]
 fn test_save_session_returns_valid_data() {
-    setup();
+    let _ = setup();
     let session = SessionData {
         session_type: "stopwatch".to_string(),
         started: chrono::Utc::now().to_rfc3339(),
@@ -46,7 +51,7 @@ fn test_save_session_returns_valid_data() {
 
 #[test]
 fn test_save_session_with_laps() {
-    setup();
+    let _ = setup();
     let laps = vec![
         SessionLap {
             lap: 1,
@@ -75,14 +80,14 @@ fn test_save_session_with_laps() {
 
 #[test]
 fn test_get_sessions_empty() {
-    setup();
+    let _ = setup();
     let sessions = get_sessions(None, None).unwrap();
     assert!(sessions.is_empty());
 }
 
 #[test]
 fn test_get_sessions_returns_all() {
-    setup();
+    let _ = setup();
     let s1 = SessionData {
         session_type: "stopwatch".to_string(),
         started: chrono::Utc::now().to_rfc3339(),
@@ -109,7 +114,7 @@ fn test_get_sessions_returns_all() {
 
 #[test]
 fn test_get_sessions_filter_by_type() {
-    setup();
+    let _ = setup();
     let s1 = SessionData {
         session_type: "stopwatch".to_string(),
         started: chrono::Utc::now().to_rfc3339(),
@@ -136,7 +141,7 @@ fn test_get_sessions_filter_by_type() {
 
 #[test]
 fn test_get_sessions_limit() {
-    setup();
+    let _ = setup();
     for i in 0..5 {
         let s = SessionData {
             session_type: "stopwatch".to_string(),
@@ -155,7 +160,7 @@ fn test_get_sessions_limit() {
 
 #[test]
 fn test_get_sessions_most_recent_first() {
-    setup();
+    let _ = setup();
     let s1 = SessionData {
         session_type: "stopwatch".to_string(),
         started: chrono::Utc::now().to_rfc3339(),
@@ -184,7 +189,7 @@ fn test_get_sessions_most_recent_first() {
 
 #[test]
 fn test_get_session_count() {
-    setup();
+    let _ = setup();
     assert_eq!(get_session_count(), 0);
     let s = SessionData {
         session_type: "stopwatch".to_string(),
